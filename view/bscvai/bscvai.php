@@ -4,7 +4,7 @@
 /*
  * GUI de Bourne Store CAtalogo VIrtual 
  */
-$Lista = $this->model->Listar();
+$Lista = $this->model->ListarTPag();
 $artXPag = 12;
 
 $numPag = $this->model->filas;
@@ -12,7 +12,7 @@ $numPag = $this->model->filas;
 $pag = $numPag / $artXPag;
 
 $totPag = ceil($pag);
-
+$cont = 0;
 ?>
 
 <main role="main">
@@ -35,19 +35,19 @@ $totPag = ceil($pag);
 
             var element = $('#square');
 
-// when mouseover execute the animation
+            // when mouseover execute the animation
             element.mouseover(function () {
 
-                // the animation starts
-                element.toggleClass('rubberBand animated');
+            // the animation starts
+            element.toggleClass('rubberBand animated');
 
-                // do something when animation ends
-                element.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function (e) {
+            // do something when animation ends
+            element.one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function (e) {
 
-                    // trick to execute the animation again
-                    $(e.target).removeClass('rubberBand animated');
+            // trick to execute the animation again
+            $(e.target).removeClass('rubberBand animated');
 
-                });
+            });
 
             });
         </script>
@@ -96,7 +96,7 @@ $totPag = ceil($pag);
                             <option>Vanish</option>
                         </select>
                     </div>
-                    
+
                 </form>
             </div>
 
@@ -105,233 +105,150 @@ $totPag = ceil($pag);
             <!--*************************************EJEMPLO CON COLUMNAS******************************************************************************************************************************    -->               
 
             <div class="row">
-                <div class="col-md-3">
-                    <div class="card mb-3 shadow-sm">
-                        <!-- -->
-                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/074018003.jpg">
-                        <div class="card-body">
-                            <p class="card-text">HERB UNGUENTO EL INDIO 260gr 1X12 [403122]</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                    <a class="btn btn-sm btn-outline-secondary" href="#" data-toggle="modal" data-target="#logoutModal">
-                                        Ver
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                </div>
-                                <small class="text-muted">0</small>
-                            </div>
-                            <!-- Logout Modal-->
-                            <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="exampleModalLabel">HERB UNGUENTO EL INDIO 260gr 1X12 [403122]</h5>
-                                            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">×</span>
-                                            </button>
+                <?php
+                if ($numPag > 0) {
+                    $page = false;
+
+                    //examino la pagina a mostrar y el inicio del registro a mostrar
+                    if (isset($_GET["pag"])) {
+                        $page = $_GET["pag"];
+                    }
+
+                    if (!$page) {
+                        $start = 0;
+                        $page = 1;
+                    } else {
+                        $start = ($page - 1) * $artXPag;
+                    }
+
+                    foreach ($this->model->ListarPag($start, $artXPag) as $r):
+                        if ($r->Disponible > 0) {
+                            $cont++;
+                            $modal = 'modal' . $cont;
+                            ?>
+                            <div class="col-md-3">
+                                <div class="card mb-3 shadow-sm">
+                                    <!-- -->
+                                    <?php
+                                    $pict = $this->model->Obtener($r->ItemCode);
+
+                                    if (empty($pict)) {
+                                        $pic = 'nofound';
+                                    } else {
+                                        $pic = $pict->nameFot;
+                                    }
+                                    ?>
+                                    <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/<?php echo $pic ?>.jpg">
+                                    <div class="card-body">
+                                        <p class="card-text"><?php echo $r->ItemName; ?></p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="btn-group">
+                                                <a class="btn btn-sm btn-outline-secondary" href="#" data-toggle="modal" data-target="#<?php echo $modal ?>">
+                                                    Ver
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
+                                            </div>
+                                            <small class="text-muted">0</small>
                                         </div>
-                                        <div class="modal-body">
-                                            <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/074018003.jpg"><hr>
-                                            <p>Precio: ‎₡5000</p><p>Disponibilidad: 12 unidades</p><p>Alguna descripción del producto para ver en que funciona</p></div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cerrar</button>
+                                        <!-- Logout Modal-->
+                                        <div class="modal fade" id="<?php echo $modal ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="exampleModalLabel"><?php echo $r->ItemName ?></h5>
+                                                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">×</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/<?php echo $pic ?>.jpg"><hr>
+                                                        <p>Precio: ‎₡<?php echo $r->LISTA_A_DETALLE ?></p><p>Disponibilidad: <?php echo $r->Disponible ?></p><p><?php echo $r->CardCode ?></p></div>
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cerrar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                    <!-- -->
                                 </div>
                             </div>
-                        </div>
-                        <!-- -->
-                    </div>
+                            <?php
+                        }
+                    endforeach;
+                    ?>
                 </div>
-                <!-- -->
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">FARMA VIRO-GRIPAL AM/DIA DISP 24s 1X1 [203825]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">ACETAMINOFEN GENFAR 500mg 100un [100019]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">ABRILL SUPERF ARCOTEN 230ml 1X12  [801005]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-danger">1</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">BRIDGE VAINILLA 10paq 300gr 1X24 [005836]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">BRIDGE AVELLANA 10paq 300gr 1X24 [005881]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">BRIDGE 100% SUGAR FREE VAIN 6paq 154.8gr 1X24</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="100%" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">BRINKY MAX CHOCOLATE 12paq 408gr 1X24 [275165]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="300" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">CRAKENAS MULTICEREAL MIEL 6paq 192GR 1X12 [046758]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="300" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">CRAKENAS MULTICEREAL MIEL 6paq 192GR 1X12 [046758]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="300" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">CRAKENAS MULTICEREAL MIEL 6paq 192GR 1X12 [046758]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card mb-3 shadow-sm">
-                                        <img class="bd-placeholder-img card-img-top" width="300" height="100%" src="img/MPhoto/nofound.jpg">
-                                        <div class="card-body">
-                                            <p class="card-text">CRAKENAS MULTICEREAL MIEL 6paq 192GR 1X12 [046758]</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Ver</button>
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary">Agregar</button>
-                                                </div>
-                                                <small class="text-muted">0</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                
-            </div>
 
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
-                    </li>
-
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item "><a class="page-link" href="#">2</a></li>
-                    <li class="page-item "><a class="page-link" href="#">3</a></li>
-                    <li class="page-item "><a class="page-link" href="#">4</a></li>
-                    <li class="page-item "><a class="page-link" href="#">5</a></li>
-                    
-
-                    <li class="page-item">
-                        <a class="page-link" href="#">Siguiente</a>
-                    </li>
-                </ul>
-            </nav>
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-center">
+                        <?php
+                        if ($totPag > 1) {
+                            $inicio = $totPag - 2;
+                            if ($page == 1) {
+                                $pag = $page;
+                                $fin = $page + 2;
+                            } else {
+                                if ($page != $inicio) {
+                                    $pag = $page - 1;
+                                    $fin = $page + 1;
+                                }else{
+                                    $pag = $page - 1;
+                                    $fin = $totPag;
+                                }
+                            }
+                            if ($page != 1) {
+                                ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?c=bscvai&pag=<?php echo ($page - 1) ?>&ri=&rf=" tabindex="-1" aria-disabled="true"><span aria-hidden="true">&laquo;</span></a>
+                                </li>
+                                <?php
+                            } else {
+                                ?>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true"><span aria-hidden="true">&laquo;</span></a>
+                                </li>
+                                <?php
+                            }
+                            if ($page > 3) {
+                                echo '<li class="page-item"><a class="page-link" href="?c=bscvai&pag=1">1</a></li>';
+                                echo '<li class="page-item"><a class="page-link" href="">...</a></li>';
+                            } else {
+                                if ($page != 1) {
+                                    echo '<li class="page-item"><a class="page-link" href="?c=bscvai&pag=1">1</a></li>';
+                                }
+                            }
+                            if ($pag >= $inicio) {
+                                $pag = $inicio;
+                                $fin = $totPag;
+                            }
+                            for ($i = $pag; $i <= $fin; $i++) {
+                                if ($page == $i) {
+                                    echo '<li class="page-item active"><a class="page-link" href="#">' . $page . '</a></li>';
+                                } else {
+                                    echo '<li class="page-item"><a class="page-link" href="?c=bscvai&pag=' . $i . '">' . $i . '</a></li>';
+                                }
+                            }
+                            if ($page < $inicio) {
+                                echo '<li class="page-item"><a class="page-link" href="">...</a></li>';
+                                echo '<li class="page-item"><a class="page-link" href="?c=bscvai&pag=' . $totPag . '">' . $totPag . '</a></li>';
+                            }
+                            if ($page != $totPag) {
+                                ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?c=bscvai&pag=<?php echo ($page + 1) ?>"><span aria-hidden="true">&raquo;</span></a>
+                                </li>
+                                <?php
+                            } else {
+                                ?><li class="page-item disabled">
+                                    <a class="page-link" href="#"><span aria-hidden="true">&raquo;</span></a>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    </nav>
+                    <?php
+                }
+            }
+            ?>
         </div>
     </div>
 </main>

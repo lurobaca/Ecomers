@@ -58,6 +58,13 @@ class bscvai {
     public $Ranking;
     
     public $filas;
+    
+    public $idFot;
+    public $nameFot;
+    public $visibFot;
+    
+    public $start;
+    public $num;
 
     public function __CONSTRUCT() {
         try {
@@ -77,6 +84,45 @@ class bscvai {
             $this->filas=$stm->rowCount();
             
             return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    public function ListarTPag() {
+        try {
+            $result = array();
+
+            $stm = $this->pdo->prepare("SELECT * FROM articulos where Disponible > 0");
+            $stm->execute();
+            
+            $this->filas=$stm->rowCount();
+            
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    
+    public function ListarPag($inicio,$numT) {
+        $this->start=$inicio;
+        $this->num=$numT;
+        try {
+            $stm = $this->pdo
+                    ->prepare("SELECT * FROM articulos where Disponible > 0 LIMIT  ".$this->start.",".$this->num."");
+
+            $stm->execute();
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+    public function Obtener($id) {
+        try {
+            $stm = $this->pdo
+                    ->prepare("SELECT * FROM fotos WHERE nameFot = ?");
+
+            $stm->execute(array($id));
+            return $stm->fetch(PDO::FETCH_OBJ);
         } catch (Exception $e) {
             die($e->getMessage());
         }
